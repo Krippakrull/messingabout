@@ -16,23 +16,115 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 
+// const ScoreSelect = () => {
+//     const [score, setScore] = useState(0);
+//
+//     return (
+//         <Form.Control size="sm" value={score} as="select" name={"score"} onChange={e => {setScore(e.target.value); console.log(score)}}>
+//             <option value={0}>Home</option>
+//             <option value={1}>1</option>
+//             <option value={2}>2</option>
+//             <option value={3}>3</option>
+//             <option value={4}>4</option>
+//             <option value={5}>5</option>
+//             <option value={6}>6</option>
+//             <option value={7}>7</option>
+//             <option value={8}>8</option>
+//             <option value={9}>9</option>
+//         </Form.Control>
+//     )
+// }
+
 const SubmitPrediction = () => {
     const [game, setGame] = useState(null);
-    const gameId = useParams();
+    const [winner, setWinner] = useState('draw');
     const user = AuthService.getCurrentUser();
+    const [scores, setScores] = useState([{'homeScore': 0, 'awayScore': 0},
+        {'homeScore': 0, 'awayScore': 0},
+        {'homeScore': 0, 'awayScore': 0}]);
 
-    const scores = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    const listScores = scores.map((score) =>
-        <option value={score}>{score}</option>);
+
+    const gameId = useParams();
+
+    // const Prediction =({ userId, gameId, winner, scores }) => (
+    //
+    // )
+    
+    const scoreList = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const listScores = scoreList.map((score) =>
+         <option value={score}>{score}</option>);
+
+    const predictionScores = [[0, 0], [0, 0], [0, 0]];
+
+    const ScoreSelect = (props) => {
+        const [score, setScore] = useState();
+
+        const updateScores = (event) => {
+            setScore(event.value);
+            console.log(event.target.value);
+            //console.log(score);
+            //let newScores = [...scores];
+            // console.log(newScores)
+            // //props.home ? newScores[props.index] = event.target.value
+            //newScores[0].homeScore = event.value;
+            //console.log(newScores);
+            //setScores(newScores);
+            // console.log(scores);
+        }
+        // const handleChange = () => {
+        //     //const newScore = event.value;
+        //     //setScore(newScore);
+        //     let newScores = [...scores];
+        //     console.log(newScores)
+        //     //props.home ? newScores[props.index] = event.target.value
+        //     newScores[0].homeScore = score;
+        //     setScores(newScores);
+        //     console.log(scores);
+        // }
+
+        return (
+            <select size="sm" value={score} as="select" onChange={e => {setScore(e.value);console.log(score)}}>
+                <option value={0}>0</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+                <option value={6}>6</option>
+                <option value={7}>7</option>
+                <option value={8}>8</option>
+                <option value={9}>9</option>
+            </select>
+        )
+    }
+
+    const updateScores = (e, arg) => {
+        console.log(e, arg);
+    }
+
+    const logWinner = () => {
+        let newScores = [...scores];
+        newScores[1].homeScore = 3;
+        setScores(newScores);
+      console.log(winner);
+      console.log(scores);
+    };
 
     const onFormSubmit = e => {
+        const prediction = new Map([
+            ['gameId', gameId.id],
+            ['userId', user.id],
+            ['winner', winner],
+            ['scores', scores]
+        ]);
         e.preventDefault()
         const formData = new FormData(e.target);
         formData.append("gameId", gameId.id);
         formData.append("userId", user.id);
-        const formDataObj = JSON.stringify(Object.fromEntries(formData.entries()));
+        const formDataObj = JSON.stringify(Object.fromEntries(prediction));
+        // formDataObj.concat('"scores":[{"homeScore":${scores}, "away}]')
         formDataObj.concat()
-        alert(formDataObj.concat('"scores" [{"homeScore":1, awayScore:3}, {"homeScore":1, awayScore:3},{"homeScore":1, awayScore:3}]'));
+        alert(formDataObj);
     }
     useEffect(() => {
         const getData = async () => {
@@ -62,25 +154,22 @@ const SubmitPrediction = () => {
             <h2>Winner</h2>
             {/*Only show this element if game is fetched*/}
             {game && (
-                <ToggleButtonGroup type="radio" name="options">
-                    <ToggleButton value={1}>{game.homeTeam.teamName}</ToggleButton>
-                    <ToggleButton value={2}>Draw</ToggleButton>
-                    <ToggleButton value={3}>{game.awayTeam.teamName}</ToggleButton>
+                <ToggleButtonGroup type="radio" name="winner" value={winner} onChange={
+                    e => { setWinner(e); logWinner() }
+                }>
+                    <ToggleButton value={'home'}>{game.homeTeam.teamName}</ToggleButton>
+                    <ToggleButton value={'draw'}>Draw</ToggleButton>
+                    <ToggleButton value={'away'}>{game.awayTeam.teamName}</ToggleButton>
                 </ToggleButtonGroup>
             )}
             <br/>
             <h2>Set 3 scores</h2>
                 <Form.Row>
                     <Col>
-                        <Form.Control name="homeScore1" size="sm" as="select">
-                            <option>Home</option>
-                            {listScores}
-                        </Form.Control>
+                        <ScoreSelect name={"1"}></ScoreSelect>
                     </Col>
                     <Col>
-                        <Form.Control size="sm" as="select">
-                            <option>Away</option>
-                        </Form.Control>
+                        <ScoreSelect name={"2"}></ScoreSelect>
                     </Col>
                 </Form.Row>
                 <Button variant="primary" type="submit">
