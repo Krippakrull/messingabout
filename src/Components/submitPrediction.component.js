@@ -12,28 +12,11 @@ import {
     DropdownButton,
     ToggleButtonGroup,
     ToggleButton,
-    Col
+    Col,
+    Modal, Container, Row
 } from "react-bootstrap";
+import './Prediction.css'
 import axios from "axios";
-
-// const ScoreSelect = () => {
-//     const [score, setScore] = useState(0);
-//
-//     return (
-//         <Form.Control size="sm" value={score} as="select" name={"score"} onChange={e => {setScore(e.target.value); console.log(score)}}>
-//             <option value={0}>Home</option>
-//             <option value={1}>1</option>
-//             <option value={2}>2</option>
-//             <option value={3}>3</option>
-//             <option value={4}>4</option>
-//             <option value={5}>5</option>
-//             <option value={6}>6</option>
-//             <option value={7}>7</option>
-//             <option value={8}>8</option>
-//             <option value={9}>9</option>
-//         </Form.Control>
-//     )
-// }
 
 const SubmitPrediction = () => {
     const [game, setGame] = useState(null);
@@ -43,12 +26,7 @@ const SubmitPrediction = () => {
         {'homeScore': 0, 'awayScore': 0},
         {'homeScore': 0, 'awayScore': 0}]);
 
-
     const gameId = useParams();
-
-    // const Prediction =({ userId, gameId, winner, scores }) => (
-    //
-    // )
     
     const scoreList = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     const listScores = scoreList.map((score) =>
@@ -56,18 +34,26 @@ const SubmitPrediction = () => {
 
     const predictionScores = [[0, 0], [0, 0], [0, 0]];
 
+
+
+    const updateScores = (e, arg) => {
+        console.log(e, arg);
+    }
+
     const ScoreSelect = (props) => {
-        const [score, setScore] = useState();
+        const [score, setScore] = useState(0);
 
         const updateScores = (event) => {
-            setScore(event.value);
-            console.log(event.target.value);
+            setScore(event.target.value);
+            console.log(score);
             //console.log(score);
-            //let newScores = [...scores];
-            // console.log(newScores)
-            // //props.home ? newScores[props.index] = event.target.value
+            let newScores = [...scores];
+            console.log(newScores);
+            props.team === 'home' ? newScores[props.index].homeScore = event.target.value
+                : newScores[props.index].awayScore = event.target.value;
+            //newScores[props.index].homeScore = event.target.value;
             //newScores[0].homeScore = event.value;
-            //console.log(newScores);
+            console.log(newScores);
             //setScores(newScores);
             // console.log(scores);
         }
@@ -83,7 +69,7 @@ const SubmitPrediction = () => {
         // }
 
         return (
-            <select size="sm" value={score} as="select" onChange={e => {setScore(e.value);console.log(score)}}>
+            <Form.Control as="select" size="sm" defaultValue={0} onChange={updateScores}>
                 <option value={0}>0</option>
                 <option value={1}>1</option>
                 <option value={2}>2</option>
@@ -94,12 +80,8 @@ const SubmitPrediction = () => {
                 <option value={7}>7</option>
                 <option value={8}>8</option>
                 <option value={9}>9</option>
-            </select>
+            </Form.Control>
         )
-    }
-
-    const updateScores = (e, arg) => {
-        console.log(e, arg);
     }
 
     const logWinner = () => {
@@ -118,13 +100,9 @@ const SubmitPrediction = () => {
             ['scores', scores]
         ]);
         e.preventDefault()
-        const formData = new FormData(e.target);
-        formData.append("gameId", gameId.id);
-        formData.append("userId", user.id);
-        const formDataObj = JSON.stringify(Object.fromEntries(prediction));
-        // formDataObj.concat('"scores":[{"homeScore":${scores}, "away}]')
-        formDataObj.concat()
-        alert(formDataObj);
+        const predictionJson = JSON.stringify(Object.fromEntries(prediction));
+        UserService.submitPrediction(predictionJson);
+        alert(predictionJson);
     }
     useEffect(() => {
         const getData = async () => {
@@ -149,11 +127,19 @@ const SubmitPrediction = () => {
     }, []);
 
     return (
-        <Jumbotron>
-            <Form onSubmit={onFormSubmit}>
-            <h2>Winner</h2>
+        <Modal.Dialog>
+            <Modal.Header closeButton>
+                <Modal.Title>Prediction</Modal.Title>
+            </Modal.Header>
+            {/*<Form onSubmit={onFormSubmit}>*/}
             {/*Only show this element if game is fetched*/}
+            <Modal.Body>
+                <Container>
+                    <Form>
+
             {game && (
+                <Row className="justify-content-md-center">
+                    <Col md={"auto"}>
                 <ToggleButtonGroup type="radio" name="winner" value={winner} onChange={
                     e => { setWinner(e); logWinner() }
                 }>
@@ -161,39 +147,82 @@ const SubmitPrediction = () => {
                     <ToggleButton value={'draw'}>Draw</ToggleButton>
                     <ToggleButton value={'away'}>{game.awayTeam.teamName}</ToggleButton>
                 </ToggleButtonGroup>
+                </Col>
+                </Row>
             )}
-            <br/>
-            <h2>Set 3 scores</h2>
-                <Form.Row>
-                    <Col>
-                        <ScoreSelect name={"1"}></ScoreSelect>
-                    </Col>
-                    <Col>
-                        <ScoreSelect name={"2"}></ScoreSelect>
-                    </Col>
-                </Form.Row>
-                <Button variant="primary" type="submit">
+                        <Row className="justify-content-md-center">
+                            <Col sm={"2"}>
+                                <Form.Label>Home</Form.Label>
+                                <ScoreSelect index={0} team={"home"}></ScoreSelect>
+                            </Col>
+                            <Col sm={"2"}>
+                                <Form.Label>Away</Form.Label>
+                                <ScoreSelect index={0} team={"away"}></ScoreSelect>
+                            </Col>
+                        </Row>
+
+                        <Row className="justify-content-md-center">
+                            <Col sm={"2"}>
+                                <Form.Label>Home</Form.Label>
+                                <ScoreSelect index={1} team={"home"}></ScoreSelect>
+                            </Col>
+                            <Col sm={"2"}>
+                                <Form.Label>Away</Form.Label>
+                                <ScoreSelect index={1} team={"away"}></ScoreSelect>
+                            </Col>
+                        </Row>
+
+                        <Row className="justify-content-md-center">
+                            <Col sm={"2"}>
+                                <Form.Label>Home</Form.Label>
+                                <ScoreSelect index={2} team={"home"}></ScoreSelect>
+                            </Col>
+                            <Col sm={"2"}>
+                                <Form.Label>Away</Form.Label>
+                                <ScoreSelect index={2} team={"away"}></ScoreSelect>
+                            </Col>
+                        </Row>
+
+                    </Form></Container><br />
+            {/*    <Form>*/}
+            {/*    <Form.Row>*/}
+            {/*        <Form.Group as={Col} sm={"2"}>*/}
+            {/*            <Form.Label>Home</Form.Label>*/}
+            {/*            <ScoreSelect index={0} team={"home"}></ScoreSelect>*/}
+            {/*        </Form.Group>*/}
+            {/*        <Form.Group as={Col} sm={"2"}>*/}
+            {/*            <Form.Label>Away</Form.Label>*/}
+            {/*            <ScoreSelect index={0} team={"away"}></ScoreSelect>*/}
+            {/*    </Form.Group>*/}
+            {/*    </Form.Row>*/}
+
+            {/*        <Form.Row>*/}
+            {/*            <Form.Group as={Col} sm={"2"}>*/}
+            {/*                <ScoreSelect index={1} team={"home"}></ScoreSelect>*/}
+            {/*            </Form.Group>*/}
+            {/*            <Form.Group as={Col} sm={"2"}>*/}
+            {/*                <ScoreSelect index={1} team={"away"}></ScoreSelect>*/}
+            {/*            </Form.Group>*/}
+            {/*        </Form.Row>*/}
+
+            {/*        <Form.Row>*/}
+            {/*            <Form.Group as={Col} sm={"2"}>*/}
+            {/*                <ScoreSelect index={2} team={"home"}></ScoreSelect>*/}
+            {/*            </Form.Group>*/}
+            {/*            <Form.Group as={Col} sm={"2"}>*/}
+            {/*                <ScoreSelect index={2} team={"away"}></ScoreSelect>*/}
+            {/*            </Form.Group>*/}
+            {/*        </Form.Row>*/}
+
+            {/*</Form></Container>*/}
+                <Modal.Footer>
+                    <Button variant="primary" type="submit" onClick={onFormSubmit}>
                     Submit
                 </Button>
-            </Form>
-
-            <Dropdown>
-                <Dropdown.Toggle variant="success">
-                    Open
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                    <Dropdown.Item>
-                        1
-                    </Dropdown.Item>
-                    <Dropdown.Item>
-                        2
-                    </Dropdown.Item>
-                    <Dropdown.Item>
-                        3
-                    </Dropdown.Item>
-                </Dropdown.Menu>
-            </Dropdown>
-        </Jumbotron>
+                    <Button variant="secondary">Close</Button>
+                </Modal.Footer>
+            </Modal.Body>
+        </Modal.Dialog>
 
     );
 }

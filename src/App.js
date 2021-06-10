@@ -15,6 +15,8 @@ import BoardAdmin from "./Components/board-admin.component";
 import Teams from "./Components/teams.component";
 import Games from "./Components/games.component";
 import SubmitPrediction from "./Components/submitPrediction.component";
+import Scoreboard from "./Components/scoreboard.component";
+import MainPage from "./Components/mainPage.component";
 
 class App extends Component {
     constructor(props) {
@@ -72,6 +74,16 @@ class App extends Component {
                         <li className="nav-item">
                             <Link to={"/predict"} className="nav-link">
                                 Predict
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link to={"/scoreboard"} className="nav-link">
+                                Scoreboard
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link to={"/mainpage"} className="nav-link">
+                                Mainpage
                             </Link>
                         </li>
 
@@ -142,6 +154,8 @@ class App extends Component {
                         <Route path="/teams" component={Teams} />
                         <Route path="/games" component={Games} />
                         <Route path="/predict/:id" component={SubmitPrediction} />
+                        <Route path="/scoreboard" component={Scoreboard} />
+                        <Route path="/mainpage" component={MainPage} />
                     </Switch>
                 </div>
             </div>
